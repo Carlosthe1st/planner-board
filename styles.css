@@ -1,0 +1,1 @@
+.planner-board { display: flex; gap: var(--size-4-2); overflow-x: auto; }

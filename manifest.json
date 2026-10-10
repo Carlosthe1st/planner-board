@@ -1,0 +1,9 @@
+{
+  "id": "planner-board",
+  "name": "Planner Board",
+  "version": "0.1.0",
+  "minAppVersion": "1.8.0",
+  "description": "Manage Markdown plans as completion-aware boards.",
+  "author": "Planner Board contributors",
+  "isDesktopOnly": false
+}

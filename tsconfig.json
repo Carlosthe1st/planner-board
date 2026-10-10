@@ -1,0 +1,1 @@
+{"compilerOptions":{"inlineSourceMap":true,"inlineSources":true,"module":"ESNext","target":"ES2021","moduleResolution":"Bundler","isolatedModules":true,"strict":true,"esModuleInterop":true,"lib":["DOM","ES2021"],"skipLibCheck":true},"include":["src/**/*.ts","tests/**/*.ts"]}
