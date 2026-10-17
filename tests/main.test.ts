@@ -5,6 +5,7 @@ const registerView = vi.fn();
 
 vi.mock("obsidian", () => ({
   Plugin: class { addCommand = addCommand; registerView = registerView; app: unknown; constructor(app: unknown) { this.app = app; } },
+  Modal: class { constructor(..._args: unknown[]) {} },
   ItemView: class {},
   WorkspaceLeaf: class {},
 }));

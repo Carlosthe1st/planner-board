@@ -11,4 +11,5 @@
 .planner-card small { margin-left: auto; color: var(--text-muted); }
 .planner-card.is-completed span { text-decoration: line-through; color: var(--text-muted); }
 .planner-completed { margin-top: var(--size-4-6); }
+.planner-modal-input { width: 100%; margin: var(--size-4-2) 0 var(--size-4-4); }
 @media (max-width: 700px) { .planner-board-root { padding: var(--size-4-2); } .planner-column { min-width: min(85vw, 320px); } }

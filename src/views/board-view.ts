@@ -4,6 +4,7 @@ import { completeCard, reopenCard } from "../domain/plan-operations";
 import type { Plan } from "../domain/types";
 import { PlanConflictError, PlanFormatError } from "../services/plan-service";
 import { filterCards } from "./filters";
+import { InputModal } from "./input-modal";
 
 export class BoardView extends ItemView {
   private file: TFile | null = null;
@@ -51,14 +52,14 @@ export class BoardView extends ItemView {
     if (card.dueDate) element.createEl("small", { text: card.dueDate });
   }
   private async addTask(columnId: string): Promise<void> {
-    const title = window.prompt("Nome da tarefa:");
-    if (!title?.trim() || !this.file) return;
-    await this.update((plan) => ({ ...plan, cards: [...plan.cards, { id: `card-${crypto.randomUUID()}`, title: title.trim(), columnId, position: plan.cards.filter((card) => card.columnId === columnId && card.status === "active").length, status: "active", labels: [] }] }));
+    new InputModal(this.app, "Nova tarefa", "Nome da tarefa", (title) => {
+      void this.update((plan) => ({ ...plan, cards: [...plan.cards, { id: `card-${crypto.randomUUID()}`, title, columnId, position: plan.cards.filter((card) => card.columnId === columnId && card.status === "active").length, status: "active", labels: [] }] }));
+    }).open();
   }
   private async addColumn(): Promise<void> {
-    const title = window.prompt("Nome da coluna:");
-    if (!title?.trim() || !this.file) return;
-    await this.update((plan) => ({ ...plan, columns: [...plan.columns, { id: `column-${crypto.randomUUID()}`, title: title.trim(), position: plan.columns.length }] }));
+    new InputModal(this.app, "Nova coluna", "Nome da coluna", (title) => {
+      void this.update((plan) => ({ ...plan, columns: [...plan.columns, { id: `column-${crypto.randomUUID()}`, title, position: plan.columns.length }] }));
+    }).open();
   }
   private async update(transform: (plan: Plan) => Plan): Promise<void> {
     if (!this.file) return;
