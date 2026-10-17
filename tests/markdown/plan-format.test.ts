@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parsePlan, serializePlan } from "../../src/markdown/plan-format";
+import { parsePlan, replacePlanInMarkdown, serializePlan } from "../../src/markdown/plan-format";
 
 const source = `---
 planner-board: true
@@ -37,5 +37,12 @@ describe("planner Markdown format", () => {
   it("preserves Markdown punctuation in titles", () => {
     const parsed = parsePlan(source.replace("Draft home page", "[Plan] (phase 1)"));
     expect(parsed).toMatchObject({ ok: true, plan: { cards: expect.arrayContaining([expect.objectContaining({ title: "[Plan] (phase 1)" })]) } });
+  });
+
+  it("updates only the marked board region", () => {
+    const markdown = `${serializePlan({ columns: [{ id: "column-todo", title: "To do", position: 0 }], cards: [] })}\n# Notes\nDo not erase this.`;
+    const changed = replacePlanInMarkdown(markdown, { columns: [{ id: "column-todo", title: "To do", position: 0 }], cards: [{ id: "card-1", title: "Keep notes", columnId: "column-todo", position: 0, status: "active", labels: [] }] });
+    expect(changed).toContain("# Notes\nDo not erase this.");
+    expect(parsePlan(changed)).toMatchObject({ ok: true, plan: { cards: [{ id: "card-1" }] } });
   });
 });

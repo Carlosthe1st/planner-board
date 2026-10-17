@@ -16,7 +16,7 @@ export default class PlannerBoardPlugin extends Plugin {
   async createPlan(): Promise<void> {
     let path = "Planner.md"; let index = 2;
     while (this.app.vault.getAbstractFileByPath(path)) path = `Planner ${index++}.md`;
-    const file = await this.app.vault.create(path, "---\nplanner-board: true\n---\n\n## To do ^column-todo\n");
+    const file = await this.app.vault.create(path, "---\nplanner-board: true\n---\n\n<!-- planner-board:start -->\n## To do ^column-todo\n\n<!-- planner-board:end -->\n");
     await this.openPlan(file);
   }
   async openActivePlan(): Promise<void> {

@@ -1,6 +1,6 @@
 import type { TFile, Vault } from "obsidian";
 import type { Plan } from "../domain/types";
-import { parsePlan, serializePlan } from "../markdown/plan-format";
+import { parsePlan, replacePlanInMarkdown } from "../markdown/plan-format";
 
 export class PlanFormatError extends Error {}
 export class PlanConflictError extends Error {}
@@ -19,7 +19,7 @@ export class PlanService {
     const parsed = parsePlan(current);
     if (!parsed.ok) throw new PlanFormatError(parsed.errors.join(" "));
     const plan = transform(parsed.plan);
-    const markdown = serializePlan(plan);
+    const markdown = replacePlanInMarkdown(current, plan);
     const verified = parsePlan(markdown);
     if (!verified.ok) throw new PlanFormatError(verified.errors.join(" "));
     await this.vault.modify(file, markdown);

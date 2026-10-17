@@ -1,6 +1,6 @@
 {
   "name": "planner-board",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Manage Markdown plans as completion-aware boards.",
   "main": "main.js",
   "scripts": {

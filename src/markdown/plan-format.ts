@@ -51,7 +51,14 @@ export function parsePlan(markdown: string): ParseResult {
 }
 
 export function serializePlan(plan: Plan): string {
-  const lines = ["---", "planner-board: true", "---", ""];
+  return ["---", "planner-board: true", "---", "", renderPlanBody(plan)].join("\n").trimEnd() + "\n";
+}
+
+const boardStart = "<!-- planner-board:start -->";
+const boardEnd = "<!-- planner-board:end -->";
+
+function renderPlanBody(plan: Plan): string {
+  const lines = [boardStart];
   for (const column of [...plan.columns].sort((a, b) => a.position - b.position)) {
     lines.push(`## ${column.title} ^${column.id}`);
     for (const card of plan.cards.filter((item) => item.columnId === column.id).sort((a, b) => a.position - b.position)) {
@@ -62,5 +69,30 @@ export function serializePlan(plan: Plan): string {
     }
     lines.push("");
   }
-  return lines.join("\n").trimEnd() + "\n";
+  lines.push(boardEnd);
+  return lines.join("\n");
+}
+
+/** Replaces only the board-owned region, leaving the rest of the note intact. */
+export function replacePlanInMarkdown(markdown: string, plan: Plan): string {
+  const body = renderPlanBody(plan);
+  const markedStart = markdown.indexOf(boardStart);
+  if (markedStart >= 0) {
+    const markedEnd = markdown.indexOf(boardEnd, markedStart);
+    if (markedEnd < 0) throw new Error("Planner Board start marker has no end marker.");
+    return `${markdown.slice(0, markedStart)}${body}${markdown.slice(markedEnd + boardEnd.length)}`;
+  }
+
+  // Notes created before markers existed are migrated on their first edit. The
+  // legacy board is a contiguous run of Planner headings, tasks, metadata and
+  // blank lines; the first unrelated line remains untouched as note content.
+  const lines = markdown.split("\n");
+  const first = lines.findIndex((line) => /^## .+? \^column-[^\s]+$/.test(line));
+  if (first < 0) throw new Error("Plan has no board region to update.");
+  let end = first;
+  for (let index = first; index < lines.length; index += 1) {
+    if (/^## .+? \^column-[^\s]+$/.test(lines[index]) || /^- \[[ xX]\] .+? \^card-[^\s]+$/.test(lines[index]) || /^  - [a-z-]+:\s*/.test(lines[index]) || lines[index] === "") { end = index + 1; continue; }
+    break;
+  }
+  return [...lines.slice(0, first), body, ...lines.slice(end)].join("\n");
 }
