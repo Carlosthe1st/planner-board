@@ -1,7 +1,11 @@
 .planner-board-root { padding: var(--size-4-4); }
-.planner-toolbar { display: flex; gap: var(--size-4-2); margin-bottom: var(--size-4-4); flex-wrap: wrap; }
+.planner-toolbar { display: flex; gap: var(--size-4-2); margin-bottom: var(--size-4-4); flex-wrap: wrap; align-items: center; }
+.planner-toolbar h2 { margin: 0 auto 0 0; font-size: var(--font-ui-large); }
 .planner-board { display: flex; gap: var(--size-4-2); overflow-x: auto; align-items: flex-start; }
-.planner-column { background: var(--background-secondary); border-radius: var(--radius-m); min-width: 240px; padding: var(--size-4-2); }
+.planner-column { background: var(--background-secondary); border-radius: var(--radius-m); min-width: 280px; padding: var(--size-4-2); }
+.planner-column-header { display: flex; justify-content: space-between; align-items: center; gap: var(--size-4-2); }
+.planner-column-header h3 { margin: var(--size-4-1) 0; }
+.planner-add-task { font-size: var(--font-ui-smaller); }
 .planner-card { display: flex; align-items: center; gap: var(--size-4-2); background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-s); margin: var(--size-4-1) 0; padding: var(--size-4-2); }
 .planner-card input { min-width: 20px; min-height: 20px; }
 .planner-card small { margin-left: auto; color: var(--text-muted); }

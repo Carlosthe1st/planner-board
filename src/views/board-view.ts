@@ -24,17 +24,23 @@ export class BoardView extends ItemView {
     if (!this.plan) return;
     const root = this.contentEl; root.empty(); root.addClass("planner-board-root");
     const toolbar = root.createDiv({ cls: "planner-toolbar" });
-    const search = toolbar.createEl("input", { type: "search", placeholder: "Search tasks" });
-    search.value = this.query; search.oninput = () => { this.query = search.value; this.render(); };
-    const toggle = toolbar.createEl("button", { text: this.showCompleted ? "Hide completed" : "Show completed" });
+    toolbar.createEl("h2", { text: this.file?.basename ?? "Plano" });
+    const search = toolbar.createEl("input", { type: "search", placeholder: "Pesquisar tarefas" });
+    search.value = this.query;
+    search.oninput = () => { this.query = search.value; this.render(); requestAnimationFrame(() => { const next = this.contentEl.querySelector<HTMLInputElement>("input[type=search]"); next?.focus(); next?.setSelectionRange(this.query.length, this.query.length); }); };
+    const toggle = toolbar.createEl("button", { text: this.showCompleted ? "Ocultar concluídas" : "Mostrar concluídas" });
     toggle.onclick = () => { this.showCompleted = !this.showCompleted; this.render(); };
+    const addColumn = toolbar.createEl("button", { text: "+ Coluna" });
+    addColumn.onclick = () => this.addColumn();
     const board = root.createDiv({ cls: "planner-board" });
     for (const column of this.plan.columns) {
-      const lane = board.createDiv({ cls: "planner-column" }); lane.createEl("h3", { text: column.title });
+      const lane = board.createDiv({ cls: "planner-column" });
+      const header = lane.createDiv({ cls: "planner-column-header" }); header.createEl("h3", { text: column.title });
+      const add = header.createEl("button", { text: "+ Tarefa", cls: "planner-add-task" }); add.onclick = () => this.addTask(column.id);
       const cards = filterCards(this.plan.cards.filter((card) => card.columnId === column.id), this.query, "active");
       for (const card of cards) this.renderCard(lane, card.id, false);
     }
-    if (this.showCompleted) { const done = root.createEl("details", { cls: "planner-completed" }); done.createEl("summary", { text: "Completed" }); for (const card of filterCards(this.plan.cards, this.query, "completed")) this.renderCard(done, card.id, true); }
+    if (this.showCompleted) { const done = root.createEl("details", { cls: "planner-completed" }); done.createEl("summary", { text: "Concluídas" }); for (const card of filterCards(this.plan.cards, this.query, "completed")) this.renderCard(done, card.id, true); }
   }
   private renderCard(parent: HTMLElement, id: string, completed: boolean): void {
     const card = this.plan?.cards.find((item) => item.id === id); if (!card) return;
@@ -43,6 +49,21 @@ export class BoardView extends ItemView {
     check.onchange = () => this.changeCompletion(id, !completed);
     element.createSpan({ text: card.title });
     if (card.dueDate) element.createEl("small", { text: card.dueDate });
+  }
+  private async addTask(columnId: string): Promise<void> {
+    const title = window.prompt("Nome da tarefa:");
+    if (!title?.trim() || !this.file) return;
+    await this.update((plan) => ({ ...plan, cards: [...plan.cards, { id: `card-${crypto.randomUUID()}`, title: title.trim(), columnId, position: plan.cards.filter((card) => card.columnId === columnId && card.status === "active").length, status: "active", labels: [] }] }));
+  }
+  private async addColumn(): Promise<void> {
+    const title = window.prompt("Nome da coluna:");
+    if (!title?.trim() || !this.file) return;
+    await this.update((plan) => ({ ...plan, columns: [...plan.columns, { id: `column-${crypto.randomUUID()}`, title: title.trim(), position: plan.columns.length }] }));
+  }
+  private async update(transform: (plan: Plan) => Plan): Promise<void> {
+    if (!this.file) return;
+    try { const result = await this.plugin.planService.update(this.file, this.markdown, transform); this.plan = result.plan; this.markdown = result.markdown; this.render(); }
+    catch (error) { new Notice(error instanceof Error ? error.message : "Não foi possível guardar."); }
   }
   private async changeCompletion(id: string, complete: boolean): Promise<void> {
     if (!this.file) return;
